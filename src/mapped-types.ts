@@ -57,6 +57,15 @@ export type SymmetricDifference<A, B> = SetDifference<A | B, A & B>;
 export type NonUndefined<A> = A extends undefined ? never : A;
 
 /**
+ * Nullable
+ * @desc TBD
+ * @example
+ *   // Expect: "string | null"
+ *   SymmetricDifference<string>;
+ */
+export type Nullable<T> = T | null;
+
+/**
  * NonNullable
  * @desc Exclude undefined and null from set `A`
  * @example
@@ -442,6 +451,43 @@ export interface _DeepRequiredArray<T>
 /** @private */
 export type _DeepRequiredObject<T> = {
   [P in keyof T]-?: DeepRequired<NonUndefined<T[P]>>;
+};
+
+
+/**
+ * DeepNullable
+ * @desc Nullable that works for deeply nested structure
+ * @example
+ *   // Expect: {
+ *   //  first: null | {
+ *   //    second: null | {
+ *   //      name: string | null
+ *   //    };
+ *   //  };
+ *   // }
+ *   type NestedProps = {
+ *     first: {
+ *       second: {
+ *         name: string
+ *       };
+ *     };
+ *   };
+ *   type NullableNestedProps = DeepNullable<NestedProps>;
+ */
+export type DeepNullable<T> = T extends (...args: any[]) => any
+  ? T
+  : T extends any[]
+  ? _DeepNullableArray<T[number]>
+  : T extends object
+  ? _DeepNullableObject<T>
+  : T;
+/** @private */
+// tslint:disable-next-line:class-name
+export interface _DeepNullableArray<T>
+  extends Array<DeepNullable<Nullable<T>>> {}
+/** @private */
+export type _DeepNullableObject<T> = {
+  [P in keyof T]-?: DeepNullable<Nullable<T[P]>>;
 };
 
 /**
